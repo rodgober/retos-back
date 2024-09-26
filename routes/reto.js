@@ -15,6 +15,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+
+
 // Ruta para agregar un nuevo reto (solo accesible por administradores)
 router.post('/agregar', protect, admin, upload.fields([
   { name: 'pregunta', maxCount: 1 },
@@ -210,6 +212,10 @@ router.get('/:id/resuelto', protect, async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: 'Error al verificar contestación', error });
   }
+});
+
+router.get('/', (req, res) => {
+  res.send('Servidor funcionando');
 });
 
 module.exports = router;
