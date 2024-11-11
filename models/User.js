@@ -19,9 +19,12 @@ const userSchema = new mongoose.Schema({
   name: {type: String, required: true},
   lastName: {type: String, required: true},
   password: { type: String, required: true },
+  resetToken: { type: String, default: null},
+  tokenExpires: { type: Date, default: null},
   role: { type: String, required: true },
   nivel: { type: Number, required: true},
   answers: [answerSchema],
+  attempts: [answerSchema],
 });
 
 const User = mongoose.model('User', userSchema);
