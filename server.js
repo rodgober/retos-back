@@ -5,7 +5,9 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard')
 const perfilRoutes = require('./routes/perfil');
 const retoRoutes = require('./routes/reto');
-require('dotenv').config(); // Cargar variables del archivo .env
+require('dotenv').config({
+  path: `.env.${process.env.NODE_ENV || 'production'}`,
+});
 
 const app = express();
 
@@ -27,7 +29,7 @@ app.use('/api/perfil', perfilRoutes);
 app.use('/api/reto', retoRoutes);
 
 // Conectar a MongoDB
-mongoose.connect(process.env.MONGO_URI_Local, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Conectado a MongoDB'))
   .catch(err => console.error('No se pudo conectar a MongoDB', err));
 

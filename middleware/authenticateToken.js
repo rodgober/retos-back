@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config(); // Cargar variables del archivo .env
+
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
