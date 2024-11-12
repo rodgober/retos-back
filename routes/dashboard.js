@@ -28,6 +28,9 @@ router.get('/usuarios/top', async (req, res) => {
   try {
       const usuariosOrdenados = await User.aggregate([
         {
+          $match: { role: "user" } // Filtra solo los usuarios con rol "user"
+        },
+        {
             $addFields: {
                 totalRespuestas: { $size: "$answers" } // Agrega un campo con la cantidad de respuestas
             }
