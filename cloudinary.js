@@ -1,3 +1,4 @@
+require('dotenv').config(); // Cargar variables del archivo .env
 const cloudinary = require('cloudinary').v2;
 
 cloudinary.config({

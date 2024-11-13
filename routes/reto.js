@@ -3,9 +3,13 @@ const User = require('../models/User');
 const express = require('express');
 const { protect, admin, user } = require('../middleware/authMiddleware');
 const router = express.Router();
-const cloudinary = require('../cloudinary');
+require('dotenv').config();
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
 const multer = require('multer');
 const path = require('path');
+
+
 
 // Configurar multer para manejar los archivos de imagen
 const storage = multer.diskStorage({
@@ -17,6 +21,27 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage });
+///////////////////////////////////////////////////
+
+
+router.post("/subir", upload.single("image"), async (req, res) => {
+
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path);
+
+    // Borra la imagen del almacenamiento temporal
+    fs.unlinkSync(req.file.path);
+
+    // Respuesta con la URL de la imagen
+    res.json({ imageUrl: result.secure_url });
+  } catch (error) {
+    res.status(500).json({ error: "Error al subir la imagen" });
+  }
+});
+
+
+
+////////////////////////////////////////////////////7
 
 router.get('/', (req, res) => {
   res.send('Servidor funcionando');
@@ -50,7 +75,11 @@ router.post('/agregar', protect, admin, upload.fields([
             valorConvertido = respuesta; // Para respuestas abiertas (texto, sin conversión)
             break;
         }
-
+        console.log('Cloudinary config:', {
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
         let preguntaResult;
         let razonamientoResult;
         let opcionesResult = null;

@@ -5,9 +5,7 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard')
 const perfilRoutes = require('./routes/perfil');
 const retoRoutes = require('./routes/reto');
-require('dotenv').config({
-  path: `.env.${process.env.NODE_ENV || 'production'}`,
-});
+require('dotenv').config(); // Cargar variables del archivo .env
 
 const app = express();
 
