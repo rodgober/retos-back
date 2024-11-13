@@ -30,3 +30,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.swp
+
+/uploads/*
+!/uploads/.gitkeep
