@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 const User = require('../models/User');
 
 const router = express.Router();
@@ -47,42 +48,76 @@ router.post('/login', async (req, res) => {
 
 router.post('/forgot-password', async (req, res) => {
   const { mail } = req.body;
-  const user = await User.findOne({ mail });
+  try {
+          const user = await User.findOne({ mail });
+          console.log(mail);
+          if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado." });
+          }
 
-  if (!user) {
-    return res.status(404).json({ message: "Usuario no encontrado." });
-  }
+          const resetToken = generateResetToken();
+          user.resetToken = resetToken;
+          user.tokenExpires = Date.now() + 3600000; // Token válido por 1 hora
+          await user.save();
 
-  const resetToken = generateResetToken();
-  user.resetToken = resetToken;
-  user.tokenExpires = Date.now() + 3600000; // Token válido por 1 hora
-  await user.save();
+          // Configuración de transporte de nodemailer
+          let transporter = nodemailer.createTransport({
+            service: 'Gmail', // o cualquier otro servicio de email como Outlook o SMTP personalizado
+            auth: {
+                user: 'rodrigogon@gmail.com', // Tu dirección de email
+                pass: 'qkhxfcscokxkubah', // Tu contraseña de email o un app password si usas autenticación en dos pasos
+            },
+            tls: {
+                rejectUnauthorized: false        // Ignorar certificados autofirmados
+            }
+          });
 
-  const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+          // Enviar correo de recuperación
+          const mailOptions = {
+            to: user.mail,
+            from: 'rodrigogon@gmail.com',
+            subject: 'Recuperación de contraseña',
+            text: `Recibiste este correo porque solicitaste la recuperación de tu contraseña.\n\n` +
+                  `Haz clic en el siguiente enlace o cópialo en tu navegador para completar el proceso:\n\n` +
+                  `https://mathethon.com/reset-password/${resetToken}\n\n` +
+                  `Si no solicitaste este cambio, ignora este correo.\n`
+          };
+          await transporter.sendMail(mailOptions);
+          res.json({ message: 'Correo de recuperación enviado' });
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: 'Error al enviar el correo' });
+      }
 
+ // const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
   // Función para enviar el correo con el link
   //sendResetEmail(user.mail, resetLink);
 
   //res.json({ message: "Correo enviado con instrucciones para restablecer la contraseña." });
-  res.json({ message: resetLink });
+ // res.json({ message: resetLink });
 });
 
-router.post('/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body;
-  console.log("Token recibido: ", token);
-  console.log("NewPassword recibido: ", newPassword);
-  const user = await User.findOne({ resetToken: token, tokenExpires: { $gt: Date.now() } });
+// Endpoint de restablecimiento de contraseña en el backend (por ejemplo, en routes/auth.js)
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+      const user = await User.findOne({
+          resetToken: req.params.token,
+          tokenExpires: { $gt: Date.now() } // Verifica que el token no haya expirado
+      });
+      if (!user) return res.status(400).json({ message: 'Token inválido o expirado' });
 
-  if (!user) {
-    return res.status(400).json({ message: "Token inválido o expirado." });
+      // Actualizar la contraseña
+      const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+      user.password = hashedPassword; // Asegúrate de encriptar la contraseña antes de guardarla
+      user.resetToken = undefined;
+      user.tokenExpires = undefined;
+      await user.save();
+
+      res.json({ message: 'Contraseña restablecida exitosamente' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al restablecer la contraseña' });
   }
-
-  user.password = await bcrypt.hash(newPassword, 10);
-  user.resetToken = undefined;
-  user.tokenExpires = undefined;
-  await user.save();
-
-  res.json({ message: "Contraseña restablecida correctamente." });
 });
 
 
