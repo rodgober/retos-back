@@ -44,7 +44,7 @@ router.post("/subir", upload.single("image"), async (req, res) => {
 ////////////////////////////////////////////////////7
 
 router.get('/', (req, res) => {
-  res.send('Servidor funcionando');
+  res.status(200).json({ version: "1.2" });
 });
 
 // Ruta para agregar un nuevo reto (solo accesible por administradores)
