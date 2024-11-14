@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard')
 const perfilRoutes = require('./routes/perfil');
 const retoRoutes = require('./routes/reto');
+const contactRoutes = require('./routes/contact');
 require('dotenv').config(); // Cargar variables del archivo .env
 
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/perfil', perfilRoutes);
 app.use('/api/reto', retoRoutes);
+app.use('/api/contacto', contactRoutes);
 
 // Conectar a MongoDB
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
