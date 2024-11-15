@@ -23,7 +23,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 ///////////////////////////////////////////////////
 
-
 router.post("/subir", upload.single("image"), async (req, res) => {
 
   try {
@@ -39,12 +38,10 @@ router.post("/subir", upload.single("image"), async (req, res) => {
   }
 });
 
-
-
 ////////////////////////////////////////////////////7
 
 router.get('/', (req, res) => {
-  res.status(200).json({ version: "1.4" });
+  res.status(200).json({ version: "1.5" });
 });
 
 // Ruta para agregar un nuevo reto (solo accesible por administradores)
@@ -343,17 +340,32 @@ router.post('/:id/responder', protect, async (req, res) => {
     } 
     // Comparar la respuesta del usuario con la solución del reto
     const esCorrecto = compararRespuestas(reto, respuesta);
-
     if (esCorrecto) {
       // Si la respuesta es correcta, actualizar el registro del usuario
-    const user = await User.findById(userId);
+ /*   const user = await User.findById(userId);
       user.answers.push({
         reto_id: id,
         nombre: nombre,
         respuesta: respuesta,
         fecha_respuesta: new Date(),
-      });
-      await user.save();
+      });*/
+
+    // Inserta la respuesta solo si no existe en `answers`
+    const result = await User.updateOne(
+      { _id: userId, 'answers.reto_id': { $ne: id } },
+      {
+        $push: {
+          answers: {
+            reto_id: id,       // Asegúrate de que sea el ID correcto
+            nombre: nombre,     // Asigna el nombre del reto
+            respuesta: respuesta,
+            fecha_respuesta: new Date(),
+          },
+        },
+      }
+    );
+
+//      await user.save();
       // Puedes también incrementar puntos u otros aspectos del usuario
       return res.json({ message: 'Respuesta correcta', correcto: true });
     } else {

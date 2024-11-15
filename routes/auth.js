@@ -15,8 +15,8 @@ function generateResetToken() {
 router.post('/register', async (req, res) => {
   try {
     console.log(req.body);
-    const { name, lastName, mail, password, role, nivel } = req.body;
-  
+    const { name, lastName, password, role, nivel } = req.body;
+    const mail = req.body.mail.toLowerCase();
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({ name, lastName, mail, password: hashedPassword, role, nivel });
     await newUser.save();
