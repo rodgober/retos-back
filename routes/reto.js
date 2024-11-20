@@ -41,7 +41,7 @@ router.post("/subir", upload.single("image"), async (req, res) => {
 ////////////////////////////////////////////////////7
 
 router.get('/', (req, res) => {
-  res.status(200).json({ version: "1.6" });
+  res.status(200).json({ version: "1.7" });
 });
 
 // Ruta para agregar un nuevo reto (solo accesible por administradores)
@@ -217,10 +217,8 @@ router.put('/editar/:id', protect, admin, upload.fields([
     }
     if (opcionesResult) {
       updatedData.opciones = opcionesResult.secure_url;
-    }else{
-      updatedData.opciones = null;
     }
-    console.log(updatedData);
+
     // Busca el reto por su id y actualiza los campos
     const retoActualizado = await Reto.findById(retoId);  // Obtener el reto original
     if (!retoActualizado) {
